@@ -2,6 +2,7 @@ import ystockquote
 import re
 from argparse import ArgumentParser
 from datetime import date, timedelta
+#.9
 
 def last_weekday(adate):
 	adate -= timedelta(days=1)
