@@ -2,7 +2,7 @@ import ystockquote
 import re
 from argparse import ArgumentParser
 from datetime import date, timedelta
-#.9
+#10
 
 def last_weekday(adate):
 	adate -= timedelta(days=1)
@@ -30,25 +30,6 @@ def y_close(self):
 	yesterday_close_float = round(float(re.findall("\d+.\d{1,4}", yesterday_close)[0]),3)
 	return yesterday_close_float
 
-mylastweekday = last_weekday(date.today())
-stringdate = mylastweekday.strftime('%Y-%m-%d')
-
-parser = ArgumentParser(description = 'Get Pivots for ticker from ystockquote')
-parser.add_argument("-t", "--ticker", dest="ticker", help="ticker for lookup", metavar="FILE")
-args = parser.parse_args()
-
-ticker = args.ticker
-historicalinfo = ystockquote.get_historical_prices(ticker, stringdate, stringdate)
-string_historical_info = str(historicalinfo)
-newlist = string_historical_info.split(',')
-
-pivot_high = y_high(newlist)
-pivot_low = y_low(newlist)
-pivot_open = y_open(newlist)
-pivot_close = y_close(newlist)
-
-#print pivot_high, pivot_low, pivot_open, pivot_close
-
 def floor_classic(a1, a2, a3, a4):
 	pp = ((pivot_high + pivot_low + pivot_close) / 3)
 	r1 = (2 * pp) - pivot_low
@@ -70,32 +51,58 @@ def woodie_formula(a1, a2, a3, a4):
 	wf_values = [pp, r1, r2, s1, s2]
 	return wf_values
 
+mylastweekday = last_weekday(date.today())
+stringdate = mylastweekday.strftime('%Y-%m-%d')
 
-myfcvalues = floor_classic(pivot_high, pivot_low, pivot_open, pivot_close)
-mywfvalues = woodie_formula(pivot_high, pivot_low, pivot_open, pivot_close)
+parser = ArgumentParser(description = 'Get Pivots for ticker from ystockquote')
+parser.add_argument("-t", "--ticker", dest="ticker", help="ticker for lookup", metavar="FILE")
+args = parser.parse_args()
+
+ticker = args.ticker
+historicalinfo = ystockquote.get_historical_prices(ticker, stringdate, stringdate)
+string_historical_info = str(historicalinfo)
+newlist = string_historical_info.split(',')
+
+pivot_high = y_high(newlist)
+pivot_low = y_low(newlist)
+pivot_open = y_open(newlist)
+pivot_close = y_close(newlist)
+
+#print pivot_high, pivot_low, pivot_open, pivot_close
+
+
+fc_values = floor_classic(pivot_high, pivot_low, pivot_open, pivot_close)
+wf_values = woodie_formula(pivot_high, pivot_low, pivot_open, pivot_close)
+
+k_pp = pivot_close
+k_r3 = int(fc_values[3])
+k_s3 = int(fc_values[6])
+k_r2 = [int(fc_values[2]), int(wf_values[2])]
+k_s2 = [int(fc_values[5]), int(wf_values[4])]
+k_s1 = [int(fc_values[4]), int(wf_values[3])]
+k_r1 = [int(fc_values[1]), int(wf_values[1])]
+
+print "Kirk's Pivots for %s, using closing prices from %s" %(ticker, mylastweekday)
+print "R3:", k_r3
+print "R2:", k_r2
+print "R1:", k_r1
+print "Close:", k_pp
+print "S1:", k_s1
+print "S2:", k_s2
+print "S3:", k_s3
 
 print "Floor/Classic Pivots for %s, using closing prices from %s" %(ticker, mylastweekday)
-print "R3:", myfcvalues[3]
-print "R2:", myfcvalues[2]
-print "R1:", myfcvalues[1]
-print "Pivot Point:", myfcvalues[0]
-print "S1:", myfcvalues[4]
-print "S2:", myfcvalues[5]
-print "S3:", myfcvalues[6]
+print "R3:", fc_values[3]
+print "R2:", fc_values[2]
+print "R1:", fc_values[1]
+print "Pivot Point:", fc_values[0]
+print "S1:", fc_values[4]
+print "S2:", fc_values[5]
+print "S3:", fc_values[6]
 
 print "Woodie's Formula Pivots for %s, using closing prices from %s" %(ticker, mylastweekday)
-print "R2:", mywfvalues[2]
-print "R1:", mywfvalues[1]
-print "Pivot Point:", mywfvalues[0]
-print "S1:", mywfvalues[3]
-print "S2:", mywfvalues[4]
-
-
-
-
-
-
-
-
-
-
+print "R2:", wf_values[2]
+print "R1:", wf_values[1]
+print "Pivot Point:", wf_values[0]
+print "S1:", wf_values[3]
+print "S2:", wf_values[4]
