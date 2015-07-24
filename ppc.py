@@ -2,7 +2,10 @@ import ystockquote
 import re
 from argparse import ArgumentParser
 from datetime import date, timedelta
-#10
+#12
+
+#argument to get tomorrow's pivots based on today's closing price
+#argument to get today's pivots based on yesterday's closing price
 
 def last_weekday(adate):
 	adate -= timedelta(days=1)
@@ -51,12 +54,28 @@ def woodie_formula(a1, a2, a3, a4):
 	wf_values = [pp, r1, r2, s1, s2]
 	return wf_values
 
+def kirk_formula (a1, a2, a3):
+	k_pp = pivot_close
+	k_r3 = int(fc_values[3])
+	k_s3 = int(fc_values[6])
+	k_r2 = [int(fc_values[2]), int(wf_values[2])]
+	k_s2 = [int(fc_values[5]), int(wf_values[4])]
+	k_s1 = [int(fc_values[4]), int(wf_values[3])]
+	k_r1 = [int(fc_values[1]), int(wf_values[1])]
+	k_values = [k_pp, k_r1, k_r2, k_r3, k_s1, k_s2, k_s3]
+	return k_values
+
+
 mylastweekday = last_weekday(date.today())
 stringdate = mylastweekday.strftime('%Y-%m-%d')
 
 parser = ArgumentParser(description = 'Get Pivots for ticker from ystockquote')
-parser.add_argument("-t", "--ticker", dest="ticker", help="ticker for lookup", metavar="FILE")
+parser.add_argument("-t", "--ticker", required=True, dest="ticker", help="ticker for lookup", metavar="TICKER")
+parser.add_argument("-f", "--floor", action="store_true", dest="floor", default = False, help="using floor/classic pivots")
+parser.add_argument("-w", "--woodie", action="store_true", dest="woodie", default = False, help="using woodie's forumla pivots")
+parser.add_argument("-k", "--kirk", action="store_true", dest="kirk", default = False, help="using Kirk formula")
 args = parser.parse_args()
+
 
 ticker = args.ticker
 historicalinfo = ystockquote.get_historical_prices(ticker, stringdate, stringdate)
@@ -70,39 +89,50 @@ pivot_close = y_close(newlist)
 
 #print pivot_high, pivot_low, pivot_open, pivot_close
 
+if args.floor:
+	fc_values = floor_classic(pivot_high, pivot_low, pivot_open, pivot_close)
+	print "Floor/Classic Pivots for %s, using closing prices from %s" %(ticker, mylastweekday)
+	print "R3:", fc_values[3]
+	print "R2:", fc_values[2]
+	print "R1:", fc_values[1]
+	print "Pivot Point:", fc_values[0]
+	print "S1:", fc_values[4]
+	print "S2:", fc_values[5]
+	print "S3:", fc_values[6]
 
-fc_values = floor_classic(pivot_high, pivot_low, pivot_open, pivot_close)
-wf_values = woodie_formula(pivot_high, pivot_low, pivot_open, pivot_close)
+if args.woodie:
+	wf_values = woodie_formula(pivot_high, pivot_low, pivot_open, pivot_close)
+	print "Woodie's Formula Pivots for %s, using closing prices from %s" %(ticker, mylastweekday)
+	print "R2:", wf_values[2]
+	print "R1:", wf_values[1]
+	print "Pivot Point:", wf_values[0]
+	print "S1:", wf_values[3]
+	print "S2:", wf_values[4]
 
-k_pp = pivot_close
-k_r3 = int(fc_values[3])
-k_s3 = int(fc_values[6])
-k_r2 = [int(fc_values[2]), int(wf_values[2])]
-k_s2 = [int(fc_values[5]), int(wf_values[4])]
-k_s1 = [int(fc_values[4]), int(wf_values[3])]
-k_r1 = [int(fc_values[1]), int(wf_values[1])]
+if args.kirk:
+	fc_values = floor_classic(pivot_high, pivot_low, pivot_open, pivot_close)
+	wf_values = woodie_formula(pivot_high, pivot_low, pivot_open, pivot_close)
+	kr_values = kirk_formula(pivot_close, fc_values, wf_values)
+	print "Kirk's Pivots for %s, using closing prices from %s" %(ticker, mylastweekday)
+	print "R3:", kr_values[3]
+	print "R2:", kr_values[2]
+	print "R1:", kr_values[1]
+	print "Close:", kr_values[0]
+	print "S1:", kr_values[4]
+	print "S2:", kr_values[5]
+	print "S3:", kr_values[6]
 
-print "Kirk's Pivots for %s, using closing prices from %s" %(ticker, mylastweekday)
-print "R3:", k_r3
-print "R2:", k_r2
-print "R1:", k_r1
-print "Close:", k_pp
-print "S1:", k_s1
-print "S2:", k_s2
-print "S3:", k_s3
 
-print "Floor/Classic Pivots for %s, using closing prices from %s" %(ticker, mylastweekday)
-print "R3:", fc_values[3]
-print "R2:", fc_values[2]
-print "R1:", fc_values[1]
-print "Pivot Point:", fc_values[0]
-print "S1:", fc_values[4]
-print "S2:", fc_values[5]
-print "S3:", fc_values[6]
 
-print "Woodie's Formula Pivots for %s, using closing prices from %s" %(ticker, mylastweekday)
-print "R2:", wf_values[2]
-print "R1:", wf_values[1]
-print "Pivot Point:", wf_values[0]
-print "S1:", wf_values[3]
-print "S2:", wf_values[4]
+
+
+
+
+
+
+
+
+
+
+
+
