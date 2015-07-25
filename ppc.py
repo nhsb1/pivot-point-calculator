@@ -1,11 +1,9 @@
 import ystockquote
+from yahoo_finance import Share 
 import re
 from argparse import ArgumentParser
 from datetime import date, timedelta
-#12
-
-#argument to get tomorrow's pivots based on today's closing price
-#argument to get today's pivots based on yesterday's closing price
+#13
 
 def last_weekday(adate):
 	adate -= timedelta(days=1)
@@ -65,7 +63,7 @@ def kirk_formula (a1, a2, a3):
 	k_values = [k_pp, k_r1, k_r2, k_r3, k_s1, k_s2, k_s3]
 	return k_values
 
-
+	
 mylastweekday = last_weekday(date.today())
 stringdate = mylastweekday.strftime('%Y-%m-%d')
 
@@ -87,7 +85,10 @@ pivot_low = y_low(newlist)
 pivot_open = y_open(newlist)
 pivot_close = y_close(newlist)
 
-#print pivot_high, pivot_low, pivot_open, pivot_close
+print ticker
+mysymbol = Share(ticker)
+myprice = mysymbol.get_price()
+print myprice
 
 if args.floor:
 	fc_values = floor_classic(pivot_high, pivot_low, pivot_open, pivot_close)
@@ -121,18 +122,3 @@ if args.kirk:
 	print "S1:", kr_values[4]
 	print "S2:", kr_values[5]
 	print "S3:", kr_values[6]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
