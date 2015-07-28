@@ -3,7 +3,16 @@ from yahoo_finance import Share
 import re
 from argparse import ArgumentParser
 from datetime import date, timedelta
-#13
+
+#argument to get tomorrow's pivots based on today's closing price
+#argument to get today's pivots based on yesterday's closing price
+
+#Using yesterday's closing information (provided by ystockquote), this tool leverages several algorithims to calculate support and resistenance pivot points for the current day's session.  
+#The formulas available are the Floor/Classic formula (-f), the Woodie's forumla (-w), and Kirk's formula (-k).  Current pricing uses the yahoo_finance module to get current pricing and insert it into 
+#into the support and resistance levels when returning Floor/Class, or Woodie's forumula.
+#Feature request list:
+# - argument to use today's closing information instead of yesterday's closing information (calculate tomorrow's pivots after the close instead of waiting until tomorrow)
+# - add current price calculation to Kirk's forumla levels and present in a manner that makes sense (e.g. where it fits in ranges?)
 
 def last_weekday(adate):
 	adate -= timedelta(days=1)
@@ -63,7 +72,6 @@ def kirk_formula (a1, a2, a3):
 	k_values = [k_pp, k_r1, k_r2, k_r3, k_s1, k_s2, k_s3]
 	return k_values
 
-	
 mylastweekday = last_weekday(date.today())
 stringdate = mylastweekday.strftime('%Y-%m-%d')
 
@@ -73,7 +81,6 @@ parser.add_argument("-f", "--floor", action="store_true", dest="floor", default 
 parser.add_argument("-w", "--woodie", action="store_true", dest="woodie", default = False, help="using woodie's forumla pivots")
 parser.add_argument("-k", "--kirk", action="store_true", dest="kirk", default = False, help="using Kirk formula")
 args = parser.parse_args()
-
 
 ticker = args.ticker
 historicalinfo = ystockquote.get_historical_prices(ticker, stringdate, stringdate)
@@ -85,30 +92,56 @@ pivot_low = y_low(newlist)
 pivot_open = y_open(newlist)
 pivot_close = y_close(newlist)
 
-print ticker
 mysymbol = Share(ticker)
-myprice = mysymbol.get_price()
-print myprice
+myprice = float(mysymbol.get_price())
 
 if args.floor:
 	fc_values = floor_classic(pivot_high, pivot_low, pivot_open, pivot_close)
 	print "Floor/Classic Pivots for %s, using closing prices from %s" %(ticker, mylastweekday)
+	if (myprice > fc_values[3]):
+		print myprice
 	print "R3:", fc_values[3]
+	if (myprice > fc_values[2]) and (myprice < fc_values[3]):
+		print "->", myprice
 	print "R2:", fc_values[2]
+	if (myprice > fc_values[1]) and (myprice < fc_values[2]):
+		print "->", myprice
 	print "R1:", fc_values[1]
+	if (myprice > fc_values[0]) and (myprice < fc_values[1]):
+		print "->", myprice
 	print "Pivot Point:", fc_values[0]
+	if (myprice > fc_values[4]) and (myprice < fc_values[0]):
+		print "->", myprice
 	print "S1:", fc_values[4]
+	if (myprice > fc_values[5]) and (myprice < fc_values[4]):
+		print "->", myprice
 	print "S2:", fc_values[5]
+	if (myprice > fc_values[6]) and (myprice < fc_values[5]):
+		print "->", myprice
 	print "S3:", fc_values[6]
+	if (myprice < fc_values[6]):
+		print "->", myprice
 
 if args.woodie:
 	wf_values = woodie_formula(pivot_high, pivot_low, pivot_open, pivot_close)
 	print "Woodie's Formula Pivots for %s, using closing prices from %s" %(ticker, mylastweekday)
+	if (myprice > wf_values[2]):
+		print "->", myprice
 	print "R2:", wf_values[2]
+	if (myprice > wf_values[1]) and (myprice < wf_values[2]):
+		print "->", myprice
 	print "R1:", wf_values[1]
+	if (myprice > wf_values[0]) and (myprice < wf_values[1]):
+		print "->", myprice
 	print "Pivot Point:", wf_values[0]
+	if (myprice > wf_values[3]) and (myprice < wf_values[0]):
+		print "->", myprice
 	print "S1:", wf_values[3]
+	if (myprice > wf_values[4]) and (myprice < wf_values[3]):
+		print "->", myprice
 	print "S2:", wf_values[4]
+	if (myprice < wf_values[4]):
+		print "->", myprice
 
 if args.kirk:
 	fc_values = floor_classic(pivot_high, pivot_low, pivot_open, pivot_close)
