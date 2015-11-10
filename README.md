@@ -1,6 +1,28 @@
-# pivot-point-calculator
-Calculates pivot points for a given ticker symbol using either Floor/Classic, or Woodie's algorithm (-f, -w), indicating areas of support (s1, s2, s3) and resistance (r1, r2, r3) using the prior weekday's closing prices.
+# getpivots (pivot-point-calculator)
+=====================================================
+Getpivots can be used for identifying areas of support and resistance for the next day's trading session.  Getpivots calculates pivot points for a given ticker symbol using the most recent closing price data, and leverages several different algorithms which include the Floor/Classic formula, Woodie’s Formula, as well as Kirk's formula.   
 
-Usage example:
-ppc.py -f -w -t GOOG
+Install
+-------
 
+    pip install getpivots
+
+Usage
+-----
+
+    getpivots -t tickersymbol -f -w -k -c
+
+Options
+-----
+    -h, --help          Print this help text and exit
+    -t, --ticker        Specify a ticker symbol to run against (e.g. YHOO)
+    -f, --floor         Uses the Floor/Classic calculation
+    -w, --woodie		Uses the Woddy calculation
+    -k, --kirk			Uses Kirk's calculation (thekirkreport.com)
+    -c, --current       Inserts indicator for current price if run during an active session (e.g. -> 123.00)
+
+
+See Also
+--------
+
+For more information: https://pypi.python.org/pypi/getpivots
