@@ -1,5 +1,6 @@
 # getpivots (pivot-point-calculator)
 =====================================================
+
 Getpivots can be used for identifying areas of support and resistance for the next day's trading session.  Getpivots calculates pivot points for a given ticker symbol using the most recent closing price data, and leverages several different algorithms which include the Floor/Classic formula, Woodie’s Formula, as well as Kirk's formula. 
 
 
